@@ -1,0 +1,32 @@
+A.1.1	Vsearch
+Merging:
+vsearch - -fastq_mergepairs S18-51_2_ITSKYO_R1.fastq –reverse S18-51_2_ITSKYO_R2.fastq –fastqout merged2a.fq –relabel SampleName2. –fastq_maxdiffs 10
+
+Merging all files:
+cat merged*.fq > all_merged_pairs_10.fq
+
+Filter by size:
+vsearch –fastq_filter all_merged_pairs_10.fq –fastqout filtersize_10.fq –fastq_minlen 100
+
+Filter by error:
+vsearch –fastq_filter filtersize_10.fq –fastaout filter_error_10.fasta –fastq_maxee 1.0
+
+Finding unique sequences:
+vsearch –derep_fulllength filter_error_10.fasta –output uniques_10.fasta –sizeout
+
+Finding and removing chimeras de novo:
+vsearch –uchime_denovo uniques_10.fasta –nonchimeras nochimeras_10.fasta
+
+Remove singletons, sort by abundance:
+vsearch –sortbysize nochimeras_10.fasta –output no_singletons_10.fasta –minsize 2
+
+Cluster OTU’s:
+vsearch –cluster_fast no_singletons_10.fasta –sizein –id 0.97 –relabel OTU –centroids 97_OTUs_10.fasta
+
+Blast for fungi :
+vsearch –usearch_global 97_OTUs_10.fasta –db generalrelasefungi.fasta –strand both –id
+0.8 –userout ITS_97_10_OTUs_blast –userfields query+target+id
+
+A.1.3	Usearch
+OTU tables:
+usearch -otutab all_merged_pairs_10.fasta -otus clean_OTU_97_10.fasta -otutabout otutab_raw.txt
